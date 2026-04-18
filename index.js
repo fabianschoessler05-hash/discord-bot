@@ -15,7 +15,7 @@ const client = new Client({
 });
 
 // 🔑 HIER DEIN NEUER TOKEN
-const TOKEN = 'MTQ5NTAyNDQ4MDg0MDU4MTIyMA.GRCEuR.7C3tk-cZdOTzJcCQh6bEWqWydv9RtbRz1kQt24';
+const TOKEN = 'process.env.TOKEN';
 
 // 📌 HIER DEINE CHANNEL IDs EINTRAGEN
 const BUTTON_CHANNEL_ID = '1494741270176862369';
