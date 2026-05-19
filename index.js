@@ -7,36 +7,28 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  Events,
-  EmbedBuilder
+  Events
 } = require('discord.js');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
 });
 
-// 🔑 TOKEN (Railway Variable)
 const TOKEN = process.env.TOKEN;
 
-// 📌 CHANNEL IDS
+// CHANNEL IDS
 const BUTTON_CHANNEL_ID = '1494741270176862369';
 const NORMAL_CHANNEL_ID = '1494741158889525408';
 const ANON_CHANNEL_ID = '1494741158889525408';
 const MEDIC_CHANNEL_ID = '1495050392529277089';
-
-// 🔒 ADMIN LOG CHANNEL
 const LOG_CHANNEL_ID = '1494735527998652503';
 
-// ⏱️ COOLDOWN (2 Minuten)
-const cooldowns = new Map();
-
-// ✅ BOT START
+// ONLINE
 client.once('ready', async () => {
   console.log(`✅ ONLINE als ${client.user.tag}`);
 
   const channel = await client.channels.fetch(BUTTON_CHANNEL_ID);
 
-  // 🔘 BUTTONS
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('normal')
@@ -54,51 +46,18 @@ client.once('ready', async () => {
       .setStyle(ButtonStyle.Danger)
   );
 
-  // 📩 BUTTON NACHRICHT
-  const embed = new EmbedBuilder()
-    .setColor('#2f3136')
-    .setTitle('📨 Remote Message System')
-    .setDescription(
-      'Wähle unten eine Option aus, um eine Nachricht zu senden.'
-    )
-    .setFooter({
-      text: 'Sector X Communication System'
-    });
-
   await channel.send({
-    embeds: [embed],
+    content: '📨 Nachricht senden:',
     components: [row]
   });
 });
 
-// ✅ INTERACTIONS
+// INTERACTIONS
 client.on(Events.InteractionCreate, async interaction => {
 
-  // 🔘 BUTTONS
+  // BUTTON
   if (interaction.isButton()) {
 
-    // ⏱️ COOLDOWN CHECK
-    const cooldownKey = `${interaction.user.id}_${interaction.customId}`;
-
-    if (cooldowns.has(cooldownKey)) {
-
-      const expirationTime = cooldowns.get(cooldownKey);
-
-      if (Date.now() < expirationTime) {
-
-        const remaining = Math.ceil(
-          (expirationTime - Date.now()) / 1000
-        );
-
-        return interaction.reply({
-          content:
-`⏳ Bitte warte noch ${remaining} Sekunden.`,
-          ephemeral: true
-        });
-      }
-    }
-
-    // 📝 MODAL
     const modal = new ModalBuilder()
       .setCustomId(`modal_${interaction.customId}`)
       .setTitle('Nachricht eingeben');
@@ -116,50 +75,42 @@ client.on(Events.InteractionCreate, async interaction => {
     await interaction.showModal(modal);
   }
 
-  // 📩 MODAL ABSENDEN
+  // MODAL
   if (interaction.isModalSubmit()) {
 
-   const time = new Date().toLocaleTimeString('de-DE', {
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false
-});
+    const msg = interaction.fields.getTextInputValue('message');
+
+    const time = new Date().toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
 
     let channelId;
     let finalMessage;
 
-    // 📩 NORMAL
+    // NORMAL
     if (interaction.customId === 'modal_normal') {
 
       channelId = NORMAL_CHANNEL_ID;
 
       finalMessage =
-`Remote Message System [${interaction.member.displayName} – ${time} ]
+`Remote Message System [${interaction.member.displayName} – ${time}]
 
 ${msg}`;
-
-      cooldowns.set(
-        `${interaction.user.id}_normal`,
-        Date.now() + 120000
-      );
     }
 
-    // 🕶️ ANONYM
+    // ANONYM
     if (interaction.customId === 'modal_anon') {
 
       channelId = ANON_CHANNEL_ID;
 
       finalMessage =
-`Remote Message System [Unbekannt – ${time} Uhr]
+`Remote Message System [Unbekannt – ${time}]
 
 ${msg}`;
 
-      cooldowns.set(
-        `${interaction.user.id}_anon`,
-        Date.now() + 120000
-      );
-
-      // 🔒 ADMIN LOG
+      // ADMIN LOG
       const logChannel = await client.channels.fetch(LOG_CHANNEL_ID);
 
       await logChannel.send({
@@ -177,36 +128,29 @@ ${msg}`
       });
     }
 
-    // 🩺 MEDIC
+    // MEDIC
     if (interaction.customId === 'modal_medic') {
 
       channelId = MEDIC_CHANNEL_ID;
 
       finalMessage =
-`Remote Message System [Medic – ${time} Uhr]
+`Remote Message System [Medic – ${time}]
 
 ${msg}`;
-
-      cooldowns.set(
-        `${interaction.user.id}_medic`,
-        Date.now() + 120000
-      );
     }
 
-    // 📨 CHANNEL SENDEN
     const targetChannel = await client.channels.fetch(channelId);
 
     await targetChannel.send({
       content: finalMessage
     });
 
-    // ✅ BESTÄTIGUNG
     await interaction.reply({
-      content: '✅ Nachricht erfolgreich gesendet!',
+      content: '✅ Nachricht gesendet!',
       ephemeral: true
     });
   }
 });
 
-// 🚀 LOGIN
+// LOGIN
 client.login(TOKEN);
