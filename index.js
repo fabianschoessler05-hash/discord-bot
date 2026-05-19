@@ -80,11 +80,12 @@ client.on(Events.InteractionCreate, async interaction => {
 
     const msg = interaction.fields.getTextInputValue('message');
 
-    const time = new Date().toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
+  const time = new Date().toLocaleTimeString('de-DE', {
+  timeZone: 'Europe/Berlin',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+});
 
     let channelId;
     let finalMessage;
