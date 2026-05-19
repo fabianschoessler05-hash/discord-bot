@@ -119,12 +119,11 @@ client.on(Events.InteractionCreate, async interaction => {
   // 📩 MODAL ABSENDEN
   if (interaction.isModalSubmit()) {
 
-    const msg = interaction.fields.getTextInputValue('message');
-
-    const time = new Date().toLocaleTimeString('de-DE', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+   const time = new Date().toLocaleTimeString('de-DE', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+});
 
     let channelId;
     let finalMessage;
@@ -135,7 +134,7 @@ client.on(Events.InteractionCreate, async interaction => {
       channelId = NORMAL_CHANNEL_ID;
 
       finalMessage =
-`Remote Message System [${interaction.member.displayName} – ${time} Uhr]
+`Remote Message System [${interaction.member.displayName} – ${time} ]
 
 ${msg}`;
 
